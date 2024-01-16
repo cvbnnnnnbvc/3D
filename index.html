@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+        }
+        div {
+            background-color: rgb(150, 49, 49);
+        }
+
+        canvas {
+            margin: 100px;
+            width: 450px;
+            height: 400px;
+            display: block;
+            margin-bottom: 10px; 
+        }
+
+        #buttonsContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #moveButton, #moveButtonLeft, #moveButtontop, #moveButtonbottom {
+            margin: 10px;
+            background-color: black;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <script defer src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script defer src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <canvas id="renderCanvas"></canvas>
+    <div id="buttonsContainer">
+        <button id="moveButtontop">↑</button>
+        <button id="moveButtonbottom">↓</button>
+        <button id="moveButtonLeft">←</button>
+        <button id="moveButton">→</button>
+    </div>
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', function () {
+            var canvas = document.getElementById('renderCanvas');
+            var engine = new BABYLON.Engine(canvas, true);
+            var scene = new BABYLON.Scene(engine);
+            var camera = new BABYLON.ArcRotateCamera('camera', Math.PI / 2, Math.PI / 4, 10, BABYLON.Vector3.Zero(), scene);
+            camera.attachControl(canvas, true);
+            var light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
+            var sphere = BABYLON.MeshBuilder.CreateSphere('sphere', { diameter: 2 }, scene);
+            sphere.material = new BABYLON.StandardMaterial('material', scene);
+            sphere.material.diffuseColor = new BABYLON.Color3(0, 0, 1); // Blue color
+            var ground = BABYLON.MeshBuilder.CreateGround('ground', { width: 10, height: 10, subdivisions: 4 }, scene);
+            ground.position.y = -1; // Adjust ground height
+            ground.material = new BABYLON.StandardMaterial('groundMaterial', scene);
+            ground.material.diffuseColor = new BABYLON.Color3(0, 0.5, 0); // Green color
+            var moveButton = document.getElementById('moveButton');
+            var moveButtonLeft = document.getElementById('moveButtonLeft');
+            var moveButtontop = document.getElementById('moveButtontop');
+            var moveButtonbottom = document.getElementById('moveButtonbottom');
+            var isMoving = false;
+            var isMovingLeft = false;
+            var isMovingTop = false;
+            var isMovingBottom = false;
+            var intervalId;
+
+            function startMoving(direction) {
+                intervalId = setInterval(function () {
+                    var speed = 0.05;
+                    var deltaVector = BABYLON.Vector3.Zero();
+
+                    switch (direction) {
+                        case 'right':
+                            deltaVector = camera.getDirection(BABYLON.Axis.X);
+                            deltaVector.y = 0; // Remove Y component
+                            break;
+                        case 'left':
+                            deltaVector = camera.getDirection(BABYLON.Axis.X).negate();
+                            deltaVector.y = 0; // Remove Y component
+                            break;
+                        case 'top':
+                            deltaVector = camera.getDirection(BABYLON.Axis.Z);
+                            deltaVector.y = 0; // Remove Y component
+                            break;
+                        case 'bottom':
+                            deltaVector = camera.getDirection(BABYLON.Axis.Z).negate();
+                            deltaVector.y = 0; // Remove Y component
+                            break;
+                        default:
+                            break;
+                    }
+
+                    sphere.position.addInPlace(deltaVector.scale(speed));
+                    camera.target.copyFrom(sphere.position);
+                }, 16);
+            }
+
+            function stopMoving() {
+                clearInterval(intervalId);
+            }
+
+            moveButton.addEventListener('pointerdown', function () {
+                isMoving = true;
+                isMovingLeft = false;
+                startMoving('right');
+            });
+
+            moveButton.addEventListener('pointerup', function () {
+                isMoving = false;
+                stopMoving();
+            });
+
+            moveButtonLeft.addEventListener('pointerdown', function () {
+                isMovingLeft = true;
+                isMoving = false;
+                startMoving('left');
+            });
+
+            moveButtonLeft.addEventListener('pointerup', function () {
+                isMovingLeft = false;
+                stopMoving();
+            });
+
+            moveButtontop.addEventListener('pointerdown', function () {
+                isMovingTop = true;
+                isMovingBottom = false;
+                startMoving('top');
+            });
+
+            moveButtontop.addEventListener('pointerup', function () {
+                isMovingTop = false;
+                stopMoving();
+            });
+
+            moveButtonbottom.addEventListener('pointerdown', function () {
+                isMovingBottom = true;
+                isMovingTop = false;
+                startMoving('bottom');
+            });
+
+            moveButtonbottom.addEventListener('pointerup', function () {
+                isMovingBottom = false;
+                stopMoving();
+            });
+
+            engine.runRenderLoop(function () {
+                scene.render();
+            });
+
+            window.addEventListener('resize', function () {
+                engine.resize();
+            });
+        });
+    </script>
+</body>
+</html>
