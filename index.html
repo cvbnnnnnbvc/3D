@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D ball</title>
+    <title>3 D</title>
     <style>
         body {
             margin: 0;
@@ -12,7 +12,7 @@
             align-items: center;
             height: 100vh;
             background-color: black;
-            overflow: hidden;
+            overflow: hidden; /* 禁用垂直和水平滚动条 */
         }
         div {
             background-color: rgb(150, 49, 49);
@@ -28,7 +28,6 @@
         canvas:focus {
             outline: none;
         }
-
         #buttonsContainer {
             display: flex;
             justify-content: center;
@@ -57,132 +56,132 @@
         <button id="moveButton">→</button>
     </div>
     <script type="module">
-        document.addEventListener('DOMContentLoaded', function () {
-            var canvas = document.getElementById('renderCanvas');
-            var engine = new BABYLON.Engine(canvas, true);
-            var scene = new BABYLON.Scene(engine);
-            var camera = new BABYLON.ArcRotateCamera('camera', Math.PI / 2, Math.PI / 4, 10, BABYLON.Vector3.Zero(), scene);
-            camera.attachControl(canvas, true);
-            var light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
-            var sphere = BABYLON.MeshBuilder.CreateSphere('sphere', { diameter: 2 }, scene);
-            sphere.material = new BABYLON.StandardMaterial('material', scene);
-            sphere.material.diffuseColor = new BABYLON.Color3(0, 0, 1); //小球颜色
-            var ground = BABYLON.MeshBuilder.CreateGround('ground', { width: 10, height: 10, subdivisions: 4 }, scene);
-            ground.position.y = -1; 
-            ground.material = new BABYLON.StandardMaterial('groundMaterial', scene);
-            ground.material.diffuseColor = new BABYLON.Color3(0, 0.5, 0); //地面颜色
-            var moveButton = document.getElementById('moveButton');
-            var moveButtonLeft = document.getElementById('moveButtonLeft');
-            var moveButtontop = document.getElementById('moveButtontop');
-            var moveButtonbottom = document.getElementById('moveButtonbottom');
-            var isMoving = false;
-            var isMovingLeft = false;
-            var isMovingTop = false;
-            var isMovingBottom = false;
-            var intervalId;
+        var activeTouches = {};
+        var isMoving = false;
+        var isMovingLeft = false;
+        var isMovingTop = false;
+        var isMovingBottom = false;
+        var intervalId;
 
-            function startMoving(direction) {
-                intervalId = setInterval(function () {
-                    var speed = 0.2; //小球速度
-                    var deltaVector = BABYLON.Vector3.Zero();
+        function startMoving(direction) {
+            intervalId = setInterval(function () {
+                var speed = 0.2; //小球速度
+                var deltaVector = BABYLON.Vector3.Zero();
 
-                    switch (direction) {
-                        case 'right':
-                            deltaVector = camera.getDirection(BABYLON.Axis.X);
-                            deltaVector.y = 0; 
-                            break;
-                        case 'left':
-                            deltaVector = camera.getDirection(BABYLON.Axis.X).negate();
-                            deltaVector.y = 0; 
-                            break;
-                        case 'top':
-                            deltaVector = camera.getDirection(BABYLON.Axis.Z);
-                            deltaVector.y = 0; 
-                            break;
-                        case 'bottom':
-                            deltaVector = camera.getDirection(BABYLON.Axis.Z).negate();
-                            deltaVector.y = 0; 
-                            break;
-                        default:
-                            break;
-                    }
+                switch (direction) {
+                    case 'right':
+                        deltaVector = camera.getDirection(BABYLON.Axis.X);
+                        deltaVector.y = 0; 
+                        break;
+                    case 'left':
+                        deltaVector = camera.getDirection(BABYLON.Axis.X).negate();
+                        deltaVector.y = 0; 
+                        break;
+                    case 'top':
+                        deltaVector = camera.getDirection(BABYLON.Axis.Z);
+                        deltaVector.y = 0; 
+                        break;
+                    case 'bottom':
+                        deltaVector = camera.getDirection(BABYLON.Axis.Z).negate();
+                        deltaVector.y = 0; 
+                        break;
+                    default:
+                        break;
+                }
 
-                    sphere.position.addInPlace(deltaVector.scale(speed));
-                    camera.target.copyFrom(sphere.position);
-                }, 16);
+                sphere.position.addInPlace(deltaVector.scale(speed));
+                camera.target.copyFrom(sphere.position);
+            }, 16);
+        }
+
+        function stopMoving() {
+            clearInterval(intervalId);
+        }
+
+        document.addEventListener('touchend', function (event) {
+            for (var i = 0; i < event.changedTouches.length; i++) {
+                var touch = event.changedTouches[i];
+                var touchId = touch.identifier;
+                
+                if (activeTouches[touchId]) {
+                    activeTouches[touchId] = false;
+                    stopMoving();
+                }
             }
-
-            function stopMoving() {
-                clearInterval(intervalId);
-            }
-
-            document.addEventListener('touchend', function () {
-    stopMoving();
-});
-
-moveButton.addEventListener('touchstart', function (event) {
-    event.preventDefault();
-    isMoving = true;
-    isMovingLeft = false;
-    startMoving('right');
-});
-
-moveButtonLeft.addEventListener('touchstart', function (event) {
-    event.preventDefault();
-    isMovingLeft = true;
-    isMoving = false;
-    startMoving('left');
-});
-
-moveButtontop.addEventListener('touchstart', function (event) {
-    event.preventDefault();
-    isMovingTop = true;
-    isMovingBottom = false;
-    startMoving('top');
-});
-
-moveButtonbottom.addEventListener('touchstart', function (event) {
-    event.preventDefault();
-    isMovingBottom = true;
-    isMovingTop = false;
-    startMoving('bottom');
-});
-
-document.addEventListener('touchmove', function (event) {
-    if (!isTouchOnButton(event, moveButton)) {
-        isMoving = false;
-        stopMoving();
-    }
-    if (!isTouchOnButton(event, moveButtonLeft)) {
-        isMovingLeft = false;
-        stopMoving();
-    }
-    if (!isTouchOnButton(event, moveButtontop)) {
-        isMovingTop = false;
-        stopMoving();
-    }
-    if (!isTouchOnButton(event, moveButtonbottom)) {
-        isMovingBottom = false;
-        stopMoving();
-    }
-});
-
-function isTouchOnButton(event, button) {
-    var rect = button.getBoundingClientRect();
-    var x = event.touches[0].clientX;
-    var y = event.touches[0].clientY;
-    return (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom);
-}
-
-
-            engine.runRenderLoop(function () {
-                scene.render();
-            });
-
-            window.addEventListener('resize', function () {
-                engine.resize();
-            });
         });
-    </script>
+
+        function handleTouchStart(event, button, direction) {
+            event.preventDefault(); // 阻止默认触摸事件
+            var touch = event.touches[0];
+            var touchId = touch.identifier;
+            
+            if (isTouchOnButton(touch, button) && !activeTouches[touchId]) {
+                activeTouches[touchId] = true;
+                isMoving = true;
+                isMovingLeft = false;
+                startMoving(direction);
+            }
+        }
+
+        var canvas = document.getElementById('renderCanvas');
+        var engine = new BABYLON.Engine(canvas, true);
+        var scene = new BABYLON.Scene(engine);
+        var camera = new BABYLON.ArcRotateCamera('camera', Math.PI / 2, Math.PI / 4, 10, BABYLON.Vector3.Zero(), scene);
+        camera.attachControl(canvas, true);
+        var light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
+        var sphere = BABYLON.MeshBuilder.CreateSphere('sphere', { diameter: 2 }, scene);
+        sphere.material = new BABYLON.StandardMaterial('material', scene);
+        sphere.material.diffuseColor = new BABYLON.Color3(0, 0, 1); //小球颜色
+        var ground = BABYLON.MeshBuilder.CreateGround('ground', { width: 10, height: 10, subdivisions: 4 }, scene);
+        ground.position.y = -1; 
+        ground.material = new BABYLON.StandardMaterial('groundMaterial', scene);
+        ground.material.diffuseColor = new BABYLON.Color3(0, 0.5, 0); //地面颜色
+        var moveButton = document.getElementById('moveButton');
+        var moveButtonLeft = document.getElementById('moveButtonLeft');
+        var moveButtontop = document.getElementById('moveButtontop');
+        var moveButtonbottom = document.getElementById('moveButtonbottom');
+
+        moveButton.addEventListener('touchstart', function (event) {
+            handleTouchStart(event,moveButton, 'right');
+});
+moveButtonLeft.addEventListener('touchstart', function (event) {
+        handleTouchStart(event, moveButtonLeft, 'left');
+    });
+
+    moveButtontop.addEventListener('touchstart', function (event) {
+        handleTouchStart(event, moveButtontop, 'top');
+    });
+
+    moveButtonbottom.addEventListener('touchstart', function (event) {
+        handleTouchStart(event, moveButtonbottom, 'bottom');
+    });
+
+    document.addEventListener('touchmove', function (event) {
+        for (var i = 0; i < event.touches.length; i++) {
+            var touch = event.touches[i];
+            var touchId = touch.identifier;
+
+            if (!isTouchOnButton(touch, moveButton) && !isTouchOnButton(touch, moveButtonLeft) && !isTouchOnButton(touch, moveButtontop) && !isTouchOnButton(touch, moveButtonbottom) && activeTouches[touchId]) {
+                activeTouches[touchId] = false;
+                stopMoving();
+            }
+        }
+    });
+
+    function isTouchOnButton(touch, button) {
+        var rect = button.getBoundingClientRect();
+        var x = touch.clientX;
+        var y = touch.clientY;
+        return (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom);
+    }
+
+    engine.runRenderLoop(function () {
+        scene.render();
+    });
+
+    window.addEventListener('resize', function () {
+        engine.resize();
+    });
+</script>
 </body>
 </html>
