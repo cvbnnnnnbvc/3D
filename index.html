@@ -12,6 +12,7 @@
             align-items: center;
             height: 100vh;
             background-color: black;
+            overflow: hidden;
         }
         div {
             background-color: rgb(150, 49, 49);
@@ -23,6 +24,9 @@
             height: 400px;
             display: block;
             margin-bottom: 10px; 
+        }
+        canvas:focus {
+            outline: none;
         }
 
         #buttonsContainer {
@@ -112,7 +116,7 @@
                 clearInterval(intervalId);
             }
 
-            document.addEventListener('pointerup', function () {
+            document.addEventListener('touchend', function () {
                 isMoving = false;
                 isMovingLeft = false;
                 isMovingTop = false;
@@ -120,29 +124,50 @@
                 stopMoving();
             });
 
-            moveButton.addEventListener('pointerdown', function () {
+            moveButton.addEventListener('touchstart', function (event) {
+                event.preventDefault(); // 阻止默认触摸事件
                 isMoving = true;
                 isMovingLeft = false;
                 startMoving('right');
             });
 
-            moveButtonLeft.addEventListener('pointerdown', function () {
+            moveButtonLeft.addEventListener('touchstart', function (event) {
+                event.preventDefault(); // 阻止默认触摸事件
                 isMovingLeft = true;
                 isMoving = false;
                 startMoving('left');
             });
 
-            moveButtontop.addEventListener('pointerdown', function () {
+            moveButtontop.addEventListener('touchstart', function (event) {
+                event.preventDefault(); // 阻止默认触摸事件
                 isMovingTop = true;
                 isMovingBottom = false;
                 startMoving('top');
             });
 
-            moveButtonbottom.addEventListener('pointerdown', function () {
+            moveButtonbottom.addEventListener('touchstart', function (event) {
+                event.preventDefault(); // 阻止默认触摸事件
                 isMovingBottom = true;
                 isMovingTop = false;
                 startMoving('bottom');
             });
+
+            document.addEventListener('touchmove', function (event) {
+                if (!isTouchOnButton(event, moveButton) && !isTouchOnButton(event, moveButtonLeft) && !isTouchOnButton(event, moveButtontop) && !isTouchOnButton(event, moveButtonbottom)) {
+                    isMoving = false;
+                    isMovingLeft = false;
+                    isMovingTop = false;
+                    isMovingBottom = false;
+                    stopMoving();
+                }
+            });
+
+            function isTouchOnButton(event, button) {
+                var rect = button.getBoundingClientRect();
+                var x = event.touches[0].clientX;
+                var y = event.touches[0].clientY;
+                return (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom);
+            }
 
             engine.runRenderLoop(function () {
                 scene.render();
