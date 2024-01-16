@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D</title>
+    <title>3D ball</title>
     <style>
         body {
             margin: 0;
@@ -117,57 +117,63 @@
             }
 
             document.addEventListener('touchend', function () {
-                isMoving = false;
-                isMovingLeft = false;
-                isMovingTop = false;
-                isMovingBottom = false;
-                stopMoving();
-            });
+    stopMoving();
+});
 
-            moveButton.addEventListener('touchstart', function (event) {
-                event.preventDefault(); // 阻止默认触摸事件
-                isMoving = true;
-                isMovingLeft = false;
-                startMoving('right');
-            });
+moveButton.addEventListener('touchstart', function (event) {
+    event.preventDefault();
+    isMoving = true;
+    isMovingLeft = false;
+    startMoving('right');
+});
 
-            moveButtonLeft.addEventListener('touchstart', function (event) {
-                event.preventDefault(); // 阻止默认触摸事件
-                isMovingLeft = true;
-                isMoving = false;
-                startMoving('left');
-            });
+moveButtonLeft.addEventListener('touchstart', function (event) {
+    event.preventDefault();
+    isMovingLeft = true;
+    isMoving = false;
+    startMoving('left');
+});
 
-            moveButtontop.addEventListener('touchstart', function (event) {
-                event.preventDefault(); // 阻止默认触摸事件
-                isMovingTop = true;
-                isMovingBottom = false;
-                startMoving('top');
-            });
+moveButtontop.addEventListener('touchstart', function (event) {
+    event.preventDefault();
+    isMovingTop = true;
+    isMovingBottom = false;
+    startMoving('top');
+});
 
-            moveButtonbottom.addEventListener('touchstart', function (event) {
-                event.preventDefault(); // 阻止默认触摸事件
-                isMovingBottom = true;
-                isMovingTop = false;
-                startMoving('bottom');
-            });
+moveButtonbottom.addEventListener('touchstart', function (event) {
+    event.preventDefault();
+    isMovingBottom = true;
+    isMovingTop = false;
+    startMoving('bottom');
+});
 
-            document.addEventListener('touchmove', function (event) {
-                if (!isTouchOnButton(event, moveButton) && !isTouchOnButton(event, moveButtonLeft) && !isTouchOnButton(event, moveButtontop) && !isTouchOnButton(event, moveButtonbottom)) {
-                    isMoving = false;
-                    isMovingLeft = false;
-                    isMovingTop = false;
-                    isMovingBottom = false;
-                    stopMoving();
-                }
-            });
+document.addEventListener('touchmove', function (event) {
+    if (!isTouchOnButton(event, moveButton)) {
+        isMoving = false;
+        stopMoving();
+    }
+    if (!isTouchOnButton(event, moveButtonLeft)) {
+        isMovingLeft = false;
+        stopMoving();
+    }
+    if (!isTouchOnButton(event, moveButtontop)) {
+        isMovingTop = false;
+        stopMoving();
+    }
+    if (!isTouchOnButton(event, moveButtonbottom)) {
+        isMovingBottom = false;
+        stopMoving();
+    }
+});
 
-            function isTouchOnButton(event, button) {
-                var rect = button.getBoundingClientRect();
-                var x = event.touches[0].clientX;
-                var y = event.touches[0].clientY;
-                return (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom);
-            }
+function isTouchOnButton(event, button) {
+    var rect = button.getBoundingClientRect();
+    var x = event.touches[0].clientX;
+    var y = event.touches[0].clientY;
+    return (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom);
+}
+
 
             engine.runRenderLoop(function () {
                 scene.render();
