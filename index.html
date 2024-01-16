@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D ball</title>
+    <title>3D</title>
     <style>
         body {
             margin: 0;
@@ -29,7 +29,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            user-select: none;
         }
 
         #moveButton, #moveButtonLeft, #moveButtontop, #moveButtonbottom {
@@ -39,6 +38,7 @@
             border: none;
             padding: 10px;
             cursor: pointer;
+            user-select: none; 
         }
     </style>
 </head>
@@ -62,11 +62,11 @@
             var light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
             var sphere = BABYLON.MeshBuilder.CreateSphere('sphere', { diameter: 2 }, scene);
             sphere.material = new BABYLON.StandardMaterial('material', scene);
-            sphere.material.diffuseColor = new BABYLON.Color3(0, 0, 1); // Blue color
+            sphere.material.diffuseColor = new BABYLON.Color3(0, 0, 1); //小球颜色
             var ground = BABYLON.MeshBuilder.CreateGround('ground', { width: 10, height: 10, subdivisions: 4 }, scene);
-            ground.position.y = -1; // Adjust ground height
+            ground.position.y = -1; 
             ground.material = new BABYLON.StandardMaterial('groundMaterial', scene);
-            ground.material.diffuseColor = new BABYLON.Color3(0, 0.5, 0); // Green color
+            ground.material.diffuseColor = new BABYLON.Color3(0, 0.5, 0); //地面颜色
             var moveButton = document.getElementById('moveButton');
             var moveButtonLeft = document.getElementById('moveButtonLeft');
             var moveButtontop = document.getElementById('moveButtontop');
@@ -79,25 +79,25 @@
 
             function startMoving(direction) {
                 intervalId = setInterval(function () {
-                    var speed = 0.05;
+                    var speed = 0.2; //小球速度
                     var deltaVector = BABYLON.Vector3.Zero();
 
                     switch (direction) {
                         case 'right':
                             deltaVector = camera.getDirection(BABYLON.Axis.X);
-                            deltaVector.y = 0; // Remove Y component
+                            deltaVector.y = 0; 
                             break;
                         case 'left':
                             deltaVector = camera.getDirection(BABYLON.Axis.X).negate();
-                            deltaVector.y = 0; // Remove Y component
+                            deltaVector.y = 0; 
                             break;
                         case 'top':
                             deltaVector = camera.getDirection(BABYLON.Axis.Z);
-                            deltaVector.y = 0; // Remove Y component
+                            deltaVector.y = 0; 
                             break;
                         case 'bottom':
                             deltaVector = camera.getDirection(BABYLON.Axis.Z).negate();
-                            deltaVector.y = 0; // Remove Y component
+                            deltaVector.y = 0; 
                             break;
                         default:
                             break;
@@ -112,15 +112,18 @@
                 clearInterval(intervalId);
             }
 
+            document.addEventListener('pointerup', function () {
+                isMoving = false;
+                isMovingLeft = false;
+                isMovingTop = false;
+                isMovingBottom = false;
+                stopMoving();
+            });
+
             moveButton.addEventListener('pointerdown', function () {
                 isMoving = true;
                 isMovingLeft = false;
                 startMoving('right');
-            });
-
-            moveButton.addEventListener('pointerup', function () {
-                isMoving = false;
-                stopMoving();
             });
 
             moveButtonLeft.addEventListener('pointerdown', function () {
@@ -129,31 +132,16 @@
                 startMoving('left');
             });
 
-            moveButtonLeft.addEventListener('pointerup', function () {
-                isMovingLeft = false;
-                stopMoving();
-            });
-
             moveButtontop.addEventListener('pointerdown', function () {
                 isMovingTop = true;
                 isMovingBottom = false;
                 startMoving('top');
             });
 
-            moveButtontop.addEventListener('pointerup', function () {
-                isMovingTop = false;
-                stopMoving();
-            });
-
             moveButtonbottom.addEventListener('pointerdown', function () {
                 isMovingBottom = true;
                 isMovingTop = false;
                 startMoving('bottom');
-            });
-
-            moveButtonbottom.addEventListener('pointerup', function () {
-                isMovingBottom = false;
-                stopMoving();
             });
 
             engine.runRenderLoop(function () {
